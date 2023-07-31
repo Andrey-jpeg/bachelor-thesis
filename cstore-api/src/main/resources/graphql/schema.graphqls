@@ -1,0 +1,176 @@
+#
+type AveragePriceSum {
+    average_hourly_sum: Float!
+    timestamp: ZonedDateTime
+}
+
+#
+type Basket {
+    id: String
+    payment_type: [Int]
+    price: [Float]
+    price_sum: Float!
+    product: [String]
+    product_category: [String]
+    station: String
+    ticket_number: Float!
+    timestamp: ZonedDateTime
+    volume: [Float]
+}
+
+#
+type Cluster {
+    cluster: [ClusterData]
+}
+
+#
+type ClusterData {
+    basket_count: Int!
+    cash_percentage: Float!
+    gas_percentage: Float!
+    group: Int!
+    id: String
+    includes_partner: Int!
+    latitude: Float!
+    longitude: Float!
+    price_mean: Float!
+    price_median: Float!
+    price_std: Float!
+    product_and_gas_percentage: Float!
+    product_percentage: Float!
+    station: String
+}
+
+#
+enum Daypart {
+    Day
+    Evening
+    Latenight
+    Morning
+    Night
+}
+
+#
+type FuelCategoryRule {
+    created_timestamp: ZonedDateTime
+    id: String
+    rules: [Rule]
+    sample_size: Int!
+    station: String
+}
+
+#
+type FuelRule {
+    created_timestamp: ZonedDateTime
+    id: String
+    rules: [Rule]
+    sample_size: Int!
+    station: String
+}
+
+#
+type ProductRule {
+    created_timestamp: ZonedDateTime
+    daypart: String
+    id: String
+    rules: [Rule]
+    sample_size: Int!
+    station: String
+    weekday: String
+}
+
+# Query root
+type Query {
+    getFuelCategoryRules(stations: [Station]!): [FuelCategoryRule]!
+    getTransactionsForStationsInInterval(
+        start: ZonedDateTime!
+        end: ZonedDateTime!
+        stations: [Station]!
+    ): [Transaction]!
+    getAverageHourlySums(
+        station: Station!
+        start: ZonedDateTime!
+        end: ZonedDateTime!
+    ): [AveragePriceSum]!
+    getProductRulesByStationAndWeekdayAndDaypart(
+        dayparts: [Daypart]!
+        weekdays: [Weekday]!
+        stations: [Station]!
+    ): [ProductRule]!
+    getBasketsForStationInInterval(
+        start: ZonedDateTime!
+        end: ZonedDateTime!
+        stations: [Station]!
+    ): [Basket]!
+    getFuelRules(stations: [Station]!): [FuelRule]!
+    getClusters: [Cluster]!
+}
+
+#
+type Rule {
+    antecedent_support: Float!
+    antecedents: [String]
+    confidence: Float!
+    consequent_support: Float!
+    consequents: [String]
+    conviction: Float!
+    leverage: Float!
+    lift: Float!
+    support: Float!
+    zhangs_metric: Float!
+}
+
+#
+enum Station {
+    STARN
+    STARS
+    STBIL
+    STBRO
+    STCHA
+    STCOL
+    STELO
+    STFRJ
+    STGIB
+    STGRA
+    STGRO
+    STGRU
+    STINA
+    STLOI
+    STNAB
+    STNCE
+    STRPA
+    STSET
+    STTLS
+    STTSS
+    STVDE
+    STVIM
+}
+
+#
+type Transaction {
+    external: String
+    guid: String
+    id: String
+    payment_type: Int!
+    price: Float!
+    product: String
+    product_category: String
+    station: String
+    ticket_number: Float!
+    timestamp: ZonedDateTime
+    volume: Float!
+}
+
+#
+enum Weekday {
+    Friday
+    Monday
+    Saturday
+    Sunday
+    Thursday
+    Tuesday
+    Wednesday
+}
+
+# Built-in scalar representing a date-time with a time-zone
+scalar ZonedDateTime

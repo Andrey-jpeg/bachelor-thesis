@@ -1,0 +1,52 @@
+version: '3.8'
+services:
+  mongodb:
+    image: mongo:6
+    restart: always
+    ports:
+      - 27017:27017
+    expose:
+      - 27017
+    volumes:
+      - ./data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_DATABASE: cstore
+    command: mongod --auth  
+  importer:
+    build:
+      context: ./importer
+      dockerfile: dockerfile
+    environment:
+      - MONGO_URI=mongodb://root:example@mongodb:27017
+    depends_on:
+      - mongodb
+    profiles: ["importer"]
+  cluster_importer:
+    build:
+      context: ./cluster_importer
+      dockerfile: dockerfile
+    environment:
+      - MONGO_URI=mongodb://root:example@mongodb:27017
+    depends_on:
+      - mongodb
+    profiles: ["importer"]
+  rule_miner:
+    build:
+      context: ./rule_miner
+      dockerfile: dockerfile
+    environment:
+      - MONGO_URI=mongodb://root:example@mongodb:27017
+    depends_on:
+      importer: 
+        condition: service_completed_successfully
+    profiles: ["importer", "rule_miner"]
+  graphql:
+    build:
+      context: ./cstore-api
+      dockerfile: dockerfile
+    ports:
+      - 8080:8080
+    depends_on:
+      - mongodb

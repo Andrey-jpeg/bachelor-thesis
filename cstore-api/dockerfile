@@ -1,0 +1,8 @@
+FROM maven:3.9-amazoncorretto-17 AS builder
+ADD ./pom.xml pom.xml
+ADD ./src src/
+RUN mvn clean package -DskipTests
+
+FROM openjdk:17
+COPY --from=builder target/*.jar app.jar
+ENTRYPOINT [ "java", "-Dspring.profiles.active=prod", "-jar", "/app.jar" ]
